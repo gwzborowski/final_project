@@ -118,35 +118,62 @@ def _empty_map(center=None, zoom=None):
     return fig
 
 
+_DEFAULT_ICON = {"emoji": "📍", "color": "#3b2418"}
+CATEGORY_ICONS = {
+    "Boba / Milk Tea": {"emoji": "🧋", "color": "#c98a4b"},
+    "Dessert": {"emoji": "🍡", "color": "#e3aec2"},
+    "Coffee": {"emoji": "☕", "color": "#6b4a3a"},
+    "Cafe / Tea": {"emoji": "🍵", "color": "#94ab74"},
+}
+
+
 def _shops_to_map(df, center_lat, center_lon):
     """
     Always centers on the searched location (center_lat/center_lon), never on
     the average of whatever shops came back -- if the shops shown are sample
     data from a different region, averaging their coordinates would center
     the map somewhere unrelated to what the user actually searched.
+
+    Each shop category (Boba / Milk Tea, Dessert, Coffee, Cafe / Tea) is
+    plotted as its own trace with a distinct emoji icon rendered at each
+    shop's coordinates, so the map visually distinguishes what a place
+    specializes in without needing a paid Mapbox account for custom icons.
     """
     traces = []
     if not df.empty:
-        traces.append(
-            _MAP_TRACE(
-                lat=df["lat"],
-                lon=df["lon"],
-                mode="markers",
-                marker=dict(size=14, color="#c98a4b"),
-                text=df["name"] + "<br>" + df["category"] + " · " + df["mood_tag"],
-                hoverinfo="text",
-                name="Shops",
+        for category, group in df.groupby("category"):
+            icon = CATEGORY_ICONS.get(category, _DEFAULT_ICON)
+            hovertexts = [
+                f"{row['name']}<br>{row['category']} · {row['mood_tag']}"
+                f"<br>{row.get('price_level', 'N/A')} · ⭐ {row.get('rating', 'N/A')}"
+                for _, row in group.iterrows()
+            ]
+            traces.append(
+                _MAP_TRACE(
+                    lat=group["lat"],
+                    lon=group["lon"],
+                    mode="markers+text",
+                    marker=dict(size=28, color=icon["color"]),
+                    text=[icon["emoji"]] * len(group),
+                    textfont=dict(size=15),
+                    textposition="middle center",
+                    hovertext=hovertexts,
+                    hoverinfo="text",
+                    name=category,
+                )
             )
-        )
     # Marker for the searched location itself, so it's always visible even
     # when zero (or only far-away sample) shops are returned.
     traces.append(
         _MAP_TRACE(
             lat=[center_lat],
             lon=[center_lon],
-            mode="markers",
-            marker=dict(size=16, color="#3b2418"),
-            text=["You searched here"],
+            mode="markers+text",
+            marker=dict(size=20, color="#3b2418"),
+            text=["📍"],
+            textfont=dict(size=13),
+            textposition="middle center",
+            hovertext=["You searched here"],
             hoverinfo="text",
             name="Search location",
         )
@@ -155,7 +182,8 @@ def _shops_to_map(df, center_lat, center_lon):
     fig.update_layout(
         **{_MAP_LAYOUT_KEY: dict(style="carto-positron", center=dict(lat=center_lat, lon=center_lon), zoom=11)},
         margin=dict(l=0, r=0, t=0, b=0),
-        showlegend=False,
+        showlegend=True,
+        legend=dict(orientation="h", yanchor="bottom", y=1.01, xanchor="left", x=0),
     )
     return fig
 
