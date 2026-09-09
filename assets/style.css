@@ -1,0 +1,158 @@
+/*
+  style.css
+  ---------
+  Theme tokens pulled from the "Mochi x Boba" flyer supplied in the project:
+  cream background, dusty-pink accent, deep espresso text, caramel highlight.
+  Dash auto-loads every file in /assets, so this applies globally -- no page
+  needs to import it.
+*/
+
+:root {
+  --cream: #fbf6e8;
+  --pink: #f0c6d2;
+  --pink-soft: #f8dee5;
+  --espresso: #3b2418;
+  --caramel: #c98a4b;
+  --matcha: #94ab74;
+  --white: #ffffff;
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Nunito:wght@400;600;700&display=swap');
+
+html, body {
+  background-color: var(--cream);
+  color: var(--espresso);
+  font-family: 'Nunito', sans-serif;
+  margin: 0;
+}
+
+h1, h2, h3, .brand-title {
+  font-family: 'Baloo 2', sans-serif;
+  color: var(--espresso);
+}
+
+/* ---- Top navigation bar ---- */
+.navbar-boba {
+  background-color: var(--pink);
+  padding: 14px 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 4px dashed var(--espresso);
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.navbar-boba .brand-title {
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  margin: 0;
+}
+
+.nav-links a {
+  color: var(--espresso);
+  text-decoration: none;
+  font-weight: 700;
+  margin-left: 22px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  transition: background-color 0.15s ease;
+}
+
+.nav-links a:hover {
+  background-color: var(--white);
+}
+
+/* ---- Page shell ---- */
+.page-shell {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 28px 24px 60px 24px;
+}
+
+.card-boba {
+  background-color: var(--white);
+  border-radius: 22px;
+  padding: 22px 24px;
+  margin-bottom: 22px;
+  box-shadow: 0 3px 0 rgba(59, 36, 24, 0.08);
+  border: 2px solid var(--pink-soft);
+}
+
+.divider-dashed {
+  border: none;
+  border-top: 3px dashed var(--espresso);
+  margin: 18px 0;
+}
+
+/* ---- Buttons ---- */
+.btn-boba {
+  background-color: var(--espresso);
+  color: var(--cream);
+  border: none;
+  border-radius: 999px;
+  padding: 10px 22px;
+  font-weight: 700;
+  font-family: 'Nunito', sans-serif;
+  cursor: pointer;
+  transition: transform 0.1s ease, background-color 0.15s ease;
+}
+
+.btn-boba:hover {
+  background-color: var(--caramel);
+  transform: translateY(-1px);
+}
+
+.btn-surprise {
+  background-color: var(--caramel);
+  color: var(--espresso);
+}
+
+/* ---- Form controls ---- */
+.control-label {
+  font-weight: 700;
+  margin-bottom: 6px;
+  display: block;
+}
+
+.Select-control, input[type="text"], input[type="number"] {
+  border-radius: 14px !important;
+  border: 2px solid var(--pink-soft) !important;
+}
+
+/* ---- Shop result cards ---- */
+.shop-card {
+  background-color: var(--pink-soft);
+  border-radius: 16px;
+  padding: 12px 16px;
+  margin-bottom: 10px;
+}
+
+.shop-card .shop-name {
+  font-weight: 700;
+  font-size: 16px;
+}
+
+.demo-tag {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  background-color: var(--matcha);
+  color: var(--white);
+  padding: 2px 8px;
+  border-radius: 999px;
+  margin-left: 8px;
+}
+
+.mascot-message {
+  font-size: 20px;
+  font-weight: 700;
+  text-align: center;
+  padding: 18px;
+}
+
+@media (max-width: 640px) {
+  .navbar-boba { flex-direction: column; align-items: flex-start; }
+  .nav-links a { margin-left: 0; margin-right: 14px; }
+}
