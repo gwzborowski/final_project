@@ -29,7 +29,7 @@ layout = html.Div(
         html.Div(
             className="card-boba",
             children=[
-                html.H3("Average item price"),
+                html.H3("Average Item Price"),
                 dcc.Graph(id="compare-bar-chart"),
             ],
         ),

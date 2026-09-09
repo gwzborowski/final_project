@@ -14,7 +14,7 @@ import dash
 import plotly.graph_objects as go
 from dash import Input, Output, State, callback, dcc, html
 
-from utils.data_sources import geocode_location, get_weather, mood_nudge_from_weather, query_overpass_shops
+from utils.data_sources import find_shops, geocode_location, get_weather, mood_nudge_from_weather
 
 dash.register_page(__name__, path="/", name="Search", order=0)
 
@@ -103,35 +103,59 @@ else:  # pragma: no cover - only hit on plotly < 5.24
     _MAP_LAYOUT_KEY = "mapbox"
 
 
-def _empty_map():
+# Default view when nothing has been searched yet (roughly centered on the
+# continental US so the map isn't blank/zoomed into the ocean).
+_DEFAULT_CENTER = dict(lat=39.5, lon=-98.35)
+_DEFAULT_ZOOM = 3
+
+
+def _empty_map(center=None, zoom=None):
     fig = go.Figure(_MAP_TRACE())
     fig.update_layout(
-        **{_MAP_LAYOUT_KEY: dict(style="carto-positron", center=dict(lat=37.5, lon=-77.0), zoom=6)},
+        **{_MAP_LAYOUT_KEY: dict(style="carto-positron", center=center or _DEFAULT_CENTER, zoom=zoom or _DEFAULT_ZOOM)},
         margin=dict(l=0, r=0, t=0, b=0),
     )
     return fig
 
 
-def _shops_to_map(df):
-    fig = go.Figure(
+def _shops_to_map(df, center_lat, center_lon):
+    """
+    Always centers on the searched location (center_lat/center_lon), never on
+    the average of whatever shops came back -- if the shops shown are sample
+    data from a different region, averaging their coordinates would center
+    the map somewhere unrelated to what the user actually searched.
+    """
+    traces = []
+    if not df.empty:
+        traces.append(
+            _MAP_TRACE(
+                lat=df["lat"],
+                lon=df["lon"],
+                mode="markers",
+                marker=dict(size=14, color="#c98a4b"),
+                text=df["name"] + "<br>" + df["category"] + " · " + df["mood_tag"],
+                hoverinfo="text",
+                name="Shops",
+            )
+        )
+    # Marker for the searched location itself, so it's always visible even
+    # when zero (or only far-away sample) shops are returned.
+    traces.append(
         _MAP_TRACE(
-            lat=df["lat"],
-            lon=df["lon"],
+            lat=[center_lat],
+            lon=[center_lon],
             mode="markers",
-            marker=dict(size=14, color="#c98a4b"),
-            text=df["name"] + "<br>" + df["category"] + " · " + df["mood_tag"],
+            marker=dict(size=16, color="#3b2418"),
+            text=["You searched here"],
             hoverinfo="text",
+            name="Search location",
         )
     )
+    fig = go.Figure(traces)
     fig.update_layout(
-        **{
-            _MAP_LAYOUT_KEY: dict(
-                style="carto-positron",
-                center=dict(lat=df["lat"].mean(), lon=df["lon"].mean()),
-                zoom=10,
-            )
-        },
+        **{_MAP_LAYOUT_KEY: dict(style="carto-positron", center=dict(lat=center_lat, lon=center_lon), zoom=11)},
         margin=dict(l=0, r=0, t=0, b=0),
+        showlegend=False,
     )
     return fig
 
@@ -189,19 +213,30 @@ def update_search_results(n_clicks, location_text, radius_miles, mood):
             f"Couldn't find '{location_text}'. Try a city and state, e.g. 'Norfolk, VA'.",
         )
 
-    df, used_fallback, error_message = query_overpass_shops(lat, lon, radius_miles or 5)
+    # Round coordinates before the lookup so find_shops()'s cache actually
+    # hits on repeat searches of "the same place" (e.g. re-clicking Search),
+    # instead of missing the cache over tiny floating-point differences.
+    df, source, error_message = find_shops(round(lat, 3), round(lon, 3), radius_miles or 5)
+    used_fallback = source == "fallback"
 
     if mood and mood != "Any":
         filtered = df[df["mood_tag"] == mood]
         if not filtered.empty:
             df = filtered
 
-    status = f"Showing {len(df)} spot(s) near {display_name}."
+    if df.empty:
+        status = f"No shops found near {display_name}."
+    else:
+        source_label = {"yelp": "via Yelp", "overpass": "via OpenStreetMap"}.get(source, "")
+        status = f"Showing {len(df)} spot(s) near {display_name} ({source_label})." if source_label else f"Showing {len(df)} spot(s) near {display_name}."
     if used_fallback and error_message:
         status += f" ({error_message})"
 
     location_data = {"lat": lat, "lon": lon, "display_name": display_name}
-    fig = _shops_to_map(df) if not df.empty else _empty_map()
+    # Map always centers on the searched point (see _shops_to_map docstring),
+    # regardless of whether real Overpass results or sample fallback shops
+    # are being shown, and even when there are zero shops to plot.
+    fig = _shops_to_map(df, lat, lon)
 
     return df.to_dict("records"), location_data, fig, _shops_to_cards(df), status
 

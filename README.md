@@ -84,7 +84,35 @@ boba_mochi_dashboard/
 | `is_demo_data`    | bool    | Set by `enrich_price_and_rating`| `True` when no Yelp key is configured — flags price/rating as sample |
 | `phone`, `website`| string  | Overpass tags                  | Optional, often blank from OSM                                       |
 
-## Known limitations / fallback plan
+## Diagnosing "why am I only seeing sample data?" / Overpass rate limits
+
+As of this version, `find_shops()` in `utils/data_sources.py` tries sources
+in this order, so a working Yelp key should make Overpass's rate limiting a
+non-issue in practice:
+1. **Yelp Business Search** (if a real `YELP_API_KEY` is set) — real shops,
+   real price/rating, and a much higher, predictable rate limit (500 free
+   calls/day) than Overpass's shared public pool.
+2. **Overpass API** (OpenStreetMap), tried across three mirrors — used only
+   when no Yelp key is configured, or the Yelp call fails/returns nothing.
+3. **Bundled fallback CSV** — last resort, distance-filtered to the searched
+   location, always shown as sample data since those shops are fictional.
+
+Repeat searches of the same spot within a session are cached in memory
+(`@lru_cache` on `find_shops`, keyed by rounded lat/lon + radius), so
+re-clicking Search on the same location doesn't burn additional API quota.
+
+If you're still seeing "unreachable or rate-limited" even with a Yelp key
+set, run the standalone diagnostic script to check each piece independently
+of the UI:
+```bash
+python diagnose_apis.py
+```
+It reports whether each Overpass mirror is reachable, whether a real
+Overpass query near Richmond, VA returns named shops, and whether your Yelp
+key authenticates — useful for telling a network/rate-limit problem apart
+from an app bug.
+
+
 
 - OpenStreetMap coverage of small boba shops is inconsistent — some areas
   are well-mapped, others aren't. If a search returns too few results, the
