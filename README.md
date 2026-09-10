@@ -1,130 +1,188 @@
 # Boba x Mochi Dashboard
 
-A Dash app that helps you find Asian dessert and drink spots — boba, milk
-tea, mochi — near a location you choose, filtered by mood and nudged by
-today's real weather. Built for Team 3's Dash project lab.
+## Project Overview
 
-## Project structure
+### The Problem
 
-```
-boba_mochi_dashboard/
-├── app.py                     # App shell: nav bar, shared stores, page routing
-├── pages/
-│   ├── search.py               # Page 1 — location/radius/mood search, map, results
-│   ├── compare.py              # Page 2 — compare selected shops by price/rating
-│   └── about.py                 # Page 3 — project blurb + "Surprise Me" mascot
-├── utils/
-│   └── data_sources.py         # All external API calls + fallback-CSV logic
-├── data/
-│   └── fallback_boba_shops.csv # 30 sample shops used when live APIs are unreachable
-├── assets/
-│   └── style.css               # Theme (cream / pink / espresso, matches project flyer)
-├── .env.example                # Documents required environment variables
-├── .env                        # Your real values (git-ignored; placeholder key for now)
-├── .gitignore
-└── requirements.txt
-```
+Finding a good boba or dessert spot can be difficult when there are so many options. It can also be hard to decide where to go based on location, price, ratings, or even the weather.
 
-## Setup
+Our dashboard brings these factors together in one place to make finding a boba or dessert shop easier.
 
-1. **Create a virtual environment and install dependencies**
-   ```bash
-   python -m venv venv
-   source venv/bin/activate        # Windows: venv\Scripts\activate
-   pip install -r requirements.txt
-   ```
+### Our Audience
 
-2. **Configure environment variables**
-   `.env` is already included with placeholder values so the app runs
-   out of the box. When you have a real Yelp Fusion API key, open `.env` and
-   replace the placeholder:
-   ```
-   YELP_API_KEY=your_actual_key_here
-   ```
-   Without a real key, the Compare page still works — it shows clearly
-   labeled **"sample data"** price/rating numbers generated deterministically
-   from each shop's name, instead of leaving the chart empty.
+This dashboard is designed for people who enjoy boba, milk tea, mochi, and other Asian desserts. It can be especially useful for students, friends looking for somewhere to go, or anyone who wants a quick recommendation based on where they are.
 
-3. **Run the app**
-   ```bash
-   python app.py
-   ```
-   Then open **http://127.0.0.1:8050** in your browser.
+### What the Dashboard Does
 
-## How it works
+Users can:
 
-- **Search page**: type a location, pick a radius and optional mood, hit
-  Search. This geocodes the text with the Open-Meteo Geocoding API, queries
-  the Overpass API (OpenStreetMap) for tea/boba/dessert points within that
-  radius, and plots them on a map plus a results list. If Overpass is
-  unreachable or rate-limited, or returns nothing, the app automatically
-  falls back to `data/fallback_boba_shops.csv` (30 sample shops across the
-  DMV and Hampton Roads) so the dashboard never shows a blank page.
-- **Weather mood nudge**: once a location is searched, a second callback
-  calls Open-Meteo's forecast API for that location and suggests a mood
-  ("Refreshing" on a hot day, "Cozy" when it's cold or rainy).
-- **Compare page**: pick two or more shops from your last search and see a
-  bar chart + table comparing average item price, price tier, and rating.
-- **About / Mascot page**: hit "Surprise Me" for a random pick from your
-  current search results.
+- Search for a location
+- Choose how far they are willing to travel
+- Filter results based on their mood
+- View nearby boba, tea, and dessert shops on a map
+- See information such as ratings, price level, and average item price
+- Compare multiple shops
+- Get a recommendation based on the current weather
+- Use the "Surprise Me" feature for a random shop recommendation
 
-## Data dictionary
+The goal is to make the process of choosing a boba or dessert spot **simple, visual, and fun**.
 
-| Field            | Type    | Source                        | Notes                                                                 |
-|-------------------|---------|--------------------------------|------------------------------------------------------------------------|
-| `shop_id`         | string  | Overpass node id / fallback CSV | Unique identifier per shop                                            |
-| `name`            | string  | Overpass `name` tag / CSV      | Shop display name                                                     |
-| `lat`, `lon`      | float   | Overpass / CSV                 | Coordinates used for the map and radius search                       |
-| `address`         | string  | Overpass `addr:*` tags / CSV   | May be blank if OSM has no address tags for that node                |
-| `category`        | string  | Derived from OSM tags          | "Boba / Milk Tea", "Dessert", or "Cafe / Tea"                        |
-| `mood_tag`        | string  | Derived heuristic / CSV        | "Refreshing", "Cozy", or "Sweet" — used for mood filtering            |
-| `price_level`     | string  | Yelp (if key set) or generated | `$` / `$$` / `$$$`                                                    |
-| `rating`          | float   | Yelp (if key set) or generated | 1–5 scale                                                              |
-| `avg_item_price`  | float   | Yelp (if key set) or generated | Used as the y-axis of the Compare bar chart                          |
-| `is_demo_data`    | bool    | Set by `enrich_price_and_rating`| `True` when no Yelp key is configured — flags price/rating as sample |
-| `phone`, `website`| string  | Overpass tags                  | Optional, often blank from OSM                                       |
+---
 
-## Diagnosing "why am I only seeing sample data?" / Overpass rate limits
+## How to Run
 
-As of this version, `find_shops()` in `utils/data_sources.py` tries sources
-in this order, so a working Yelp key should make Overpass's rate limiting a
-non-issue in practice:
-1. **Yelp Business Search** (if a real `YELP_API_KEY` is set) — real shops,
-   real price/rating, and a much higher, predictable rate limit (500 free
-   calls/day) than Overpass's shared public pool.
-2. **Overpass API** (OpenStreetMap), tried across three mirrors — used only
-   when no Yelp key is configured, or the Yelp call fails/returns nothing.
-3. **Bundled fallback CSV** — last resort, distance-filtered to the searched
-   location, always shown as sample data since those shops are fictional.
+### Run Locally
 
-Repeat searches of the same spot within a session are cached in memory
-(`@lru_cache` on `find_shops`, keyed by rounded lat/lon + radius), so
-re-clicking Search on the same location doesn't burn additional API quota.
+1. Download or clone the project from GitHub.
 
-If you're still seeing "unreachable or rate-limited" even with a Yelp key
-set, run the standalone diagnostic script to check each piece independently
-of the UI:
+2. Open the project folder in VS Code.
+
+3. Create a virtual environment:
+
 ```bash
-python diagnose_apis.py
+python -m venv venv
 ```
-It reports whether each Overpass mirror is reachable, whether a real
-Overpass query near Richmond, VA returns named shops, and whether your Yelp
-key authenticates — useful for telling a network/rate-limit problem apart
-from an app bug.
 
+4. Activate the environment.
 
+**Windows:**
 
-- OpenStreetMap coverage of small boba shops is inconsistent — some areas
-  are well-mapped, others aren't. If a search returns too few results, the
-  app falls back to the bundled sample dataset automatically.
-- Without a Yelp API key, price and rating numbers are **synthetic sample
-  data** (deterministic per shop name, clearly labeled in the UI), not real
-  business data. Add a key in `.env` to replace these with real Yelp values.
-- Overpass's public instance enforces IP-based rate limiting; heavy repeated
-  searches may briefly trigger the fallback dataset.
+```bash
+venv\Scripts\activate
+```
+
+5. Install the required packages:
+
+```bash
+pip install -r requirements.txt
+```
+
+6. Add your API key to a `.env` file if you are using the Yelp API:
+
+```text
+YELP_API_KEY=your_actual_key_here
+```
+
+7. Start the dashboard:
+
+```bash
+python app.py
+```
+
+8. Open the address shown in the terminal, usually:
+
+```text
+http://127.0.0.1:8050
+```
+
+### Deploying the App
+
+The dashboard can also be hosted online using Render.
+
+For deployment, the project needs its required Python packages and environment variables. API keys should be added to Render's **Environment Variables** rather than uploaded to GitHub.
+
+The Render service runs the Dash application using Gunicorn.
+
+Render live at: https://comp-ageai-group-3-final-project-mochi-x.onrender.com/
+
+---
+
+## Data Sources
+
+The dashboard uses several sources to provide information about locations, businesses, and weather.
+
+### OpenStreetMap / Overpass API
+
+Used to find nearby tea, boba, cafe, and dessert locations.
+
+The information can include:
+
+- Shop name
+- Location
+- Address
+- Phone number
+- Website
+- Business category
+
+OpenStreetMap data can vary depending on how much information has been added for a particular area.
+
+**Important:** Overpass used as second option for finding nearby restaurants, due to technical difficulties, Yelp was used as the primary API for this task.
+
+### Open-Meteo
+
+Used for:
+
+- Weather information
+- Location geocoding
+- Weather-based recommendations
+
+Open-Meteo does not require an API key.
+
+### Yelp Fusion API
+
+Used to provide additional business information when an API key is available, including:
+
+- Ratings
+- Price level
+- Average item price
+
+### Sample Data
+
+The dashboard also includes a small sample dataset that can be used when live business information is unavailable. This helps prevent the dashboard from appearing empty when an API cannot return results.
+
+---
+
+## Data Dictionary
+
+| Field            | Description                                                       | Source                      |
+| ---------------- | ----------------------------------------------------------------- | --------------------------- |
+| `shop_id`        | Unique ID for each shop                                           | OpenStreetMap / Sample Data |
+| `name`           | Name of the shop                                                  | OpenStreetMap / Sample Data |
+| `lat`            | Latitude of the shop                                              | OpenStreetMap / Sample Data |
+| `lon`            | Longitude of the shop                                             | OpenStreetMap / Sample Data |
+| `address`        | Address of the shop                                               | OpenStreetMap / Sample Data |
+| `category`       | Type of business, such as boba, dessert, or cafe                  | OpenStreetMap               |
+| `mood_tag`       | Mood associated with the shop, such as Refreshing, Cozy, or Sweet | Dashboard                   |
+| `price_level`    | General price level ($, $$, $$$)                                  | Yelp / Sample Data          |
+| `rating`         | Business rating from 1–5                                          | Yelp / Sample Data          |
+| `avg_item_price` | Estimated average price used for comparison                       | Yelp / Sample Data          |
+| `phone`          | Business phone number, when available                             | OpenStreetMap               |
+| `website`        | Business website, when available                                  | OpenStreetMap               |
+| `is_demo_data`   | Indicates whether sample data is being used                       | Dashboard                   |
+
+---
+
+## Project Pages
+
+### Search
+
+Search for shops by location, distance, and mood. Results are displayed on a map and in a list.
+
+### Compare
+
+Compare selected shops based on factors such as price and rating.
+
+"$" → average item price ≤ $5
+"$$" → average item price > $5 and ≤ $7.50
+"$$$" → average item price > $7.50 and ≤ $11
+"$$$$" → average item price > $11 and ≤ $15
+
+### About
+
+Learn more about the project and use the "Surprise Me" feature for a random recommendation.
+
+---
+
+## Data Limitations
+
+The information shown in the dashboard depends on the data available from the APIs.
+
+Some smaller businesses may not appear in OpenStreetMap, and some businesses may have missing information such as rating, or price.
+
+When live business information is unavailable, the dashboard may use sample data instead. Sample price and rating information should not be treated as actual business information.
 
 ## Attribution
 
-- Map/POI data: © OpenStreetMap contributors, via the Overpass API (ODbL).
-- Weather + geocoding: Open-Meteo.com (free, no API key required).
-- Business price/rating enrichment (optional): Yelp Fusion API.
+- Map and business location data: OpenStreetMap contributors, through the Overpass API
+- Weather and geocoding: Open-Meteo
+- Business ratings and price information: Yelp Fusion API
