@@ -4,12 +4,13 @@
 # Also, weather mood location-name handling, and pink label styling were 
 # assisted by Claude. The functions were reviewed by us to ensure they met 
 # the project requirements and were correct.
-# 
-# pages/search.py
-# Page 1 -- "Search". Answers Q1 (find boba/mochi spots near me, within a
-# radius I choose) and feeds the weather-based mood nudge for Q3.
 
 """
+pages/search.py
+Page 1 -- "Search". Answers Q1 (find boba/mochi spots near me, within a
+radius I choose) and feeds the weather-based mood nudge for Q3.
+
+
 Callbacks defined here:
   1. update_location_options -- live typing in the Location dropdown
                                  -> Open-Meteo geocoding search -> suggestion list

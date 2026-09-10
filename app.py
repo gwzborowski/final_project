@@ -1,3 +1,8 @@
+# AI Usage
+# Claude was used to help format the app.py file, including the layout of the navigation 
+# bar and the app-wide dcc.Store components. The code was reviewed by us to ensure 
+# it met the our standards and was correct.
+
 """
 app.py
 ======

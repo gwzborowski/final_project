@@ -1,3 +1,13 @@
+# AI Usage
+# Claude was prompted to develop functions when experiencing technical 
+# difficulties with API calls. The functions were tested by us to 
+# make sure that the data was being used correctly in our app. When there
+# were issues, we used Claude to help troubleshoot and fix the problems. 
+# Ultimately, we got the Yelp API working with the help of the functions
+# that Claude supplied. Finally, we consulted Claude to help us expand
+# the different moods that the app can handle by adding more keywords to 
+# the mood detection functions.
+
 """
 data_sources.py
 ================

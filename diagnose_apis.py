@@ -1,3 +1,9 @@
+# AI Usage
+# Claude was prompted to develop functions when experiencing technical 
+# difficulties with API calls. The functions were tested by us to 
+# make sure that the data was being used correctly in our app. When there
+# were issues, we used Claude to help troubleshoot and fix the problems.
+
 """
 diagnose_apis.py
 ================
