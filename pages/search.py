@@ -1,10 +1,13 @@
+# # AI Usage:
+# Used Claude to help incorporate a searchable location dropdown,
+# and to problem solve some layout issues with the map and results list.
+# Also, weather mood location-name handling, and pink label styling were 
+# assisted by Claude. The functions were reviewed by us to ensure they met 
+# the project requirements and were correct.
+# 
 # pages/search.py
 # Page 1 -- "Search". Answers Q1 (find boba/mochi spots near me, within a
 # radius I choose) and feeds the weather-based mood nudge for Q3.
-#
-# AI assistance:
-# Used AI to help incorporate a searchable location dropdown,
-# weather mood location-name handling, and pink label styling.
 
 """
 Callbacks defined here:
@@ -57,7 +60,7 @@ layout = html.Div(
                 dcc.Dropdown(
                     id="location-input",
                     options=[],
-                    placeholder="Start typing any US city...",
+                    placeholder="Start typing any city...",
                     searchable=True,
                     clearable=True,
                 ),
@@ -144,7 +147,7 @@ layout = html.Div(
             children=[
                 html.H3("Weather Mood Check"),
                 html.P(
-                    "Search a location to judge today's mood!",
+                    "Search a location to see today's mood nudge!",
                     id="weather-nudge-text",
                 ),
             ],
@@ -420,16 +423,16 @@ def update_location_options(search_value, current_value):
     Output("results-list", "children"),
     Output("search-status", "children"),
     Input("search-button", "n_clicks"),
+    Input("mood-dropdown", "value"),  # was a State -- changing mood alone now re-runs this callback
     State("location-input", "value"),
     State("radius-input", "value"),
-    State("mood-dropdown", "value"),
     prevent_initial_call=False,
 )
 def update_search_results(
     n_clicks,
+    mood,
     location_text,
     radius_miles,
-    mood,
 ):
     if not n_clicks:
         return (
@@ -471,15 +474,23 @@ def update_search_results(
     )
 
     used_fallback = source == "fallback"
+    mood_filtered_to_empty = False
 
     if mood and mood != "Any":
         filtered = df[df["mood_tag"] == mood]
-
-        if not filtered.empty:
-            df = filtered
+        mood_filtered_to_empty = filtered.empty and not df.empty
+        df = filtered  # apply the filter even when it results in zero rows --
+        # silently keeping the unfiltered list here is what made mood look
+        # like it had no effect.
 
     if df.empty:
-        status = f"No shops found near {display_name}."
+        if mood_filtered_to_empty:
+            status = (
+                f"No shops tagged '{mood}' near {display_name}. "
+                "Try 'Any mood' or a larger radius."
+            )
+        else:
+            status = f"No shops found near {display_name}."
     else:
         source_label = {
             "yelp": "via Yelp",
@@ -532,7 +543,7 @@ def update_search_results(
 )
 def update_weather_nudge(location_data):
     if not location_data:
-        return "Search a location to see today's mood nudge."
+        return "Search a location to see today's mood nudge!"
 
     weather = get_weather(
         location_data["lat"],

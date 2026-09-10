@@ -32,7 +32,7 @@ app = Dash(
     pages_folder="pages",
     external_stylesheets=[dbc.themes.FLATLY],  # base layout/grid only -- assets/style.css overrides the look
     suppress_callback_exceptions=True,
-    title="Boba x Mochi",
+    title="Mochi x Boba",
 )
 server = app.server  # exposed for gunicorn / wsgi deployment
 

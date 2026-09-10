@@ -1,6 +1,12 @@
+# AI Usage
+# Claude was prompted to help style the layout of the home page, we supplied
+# the assets and the general layout we wanted, and Claude helped us with the
+# CSS and HTML to achieve the desired layout. The result was reviewed by us
+# and edited to our liking.
+
 """
 pages/home.py
-=============
+
 Landing page for the "Mochi x Boba" dashboard. Recreates the flyer's layout:
 donut + boba drink straddling a dashed divider, stamp-style title, and the
 "feeling thirsty / feeling snacky" mood prompts (now clickable) over a soft

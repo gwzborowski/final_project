@@ -1,4 +1,8 @@
 /*
+  AI Usage
+  Claude was used to implement these styles, but the final design was 
+  human-reviewed and edited further.
+
   style.css
   ---------
   Theme tokens pulled from the "Mochi x Boba" flyer supplied in the project:
@@ -18,17 +22,21 @@
 }
 
 /* ---- Fonts ---- */
-@import url('https://fonts.googleapis.com/css2?family=Passion+One:wght@400;700;900&family=Baloo+2:wght@500;700;800&family=Nunito:wght@400;600;700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Passion+One:wght@400;700;900&family=Baloo+2:wght@500;700;800&family=Nunito:wght@400;600;700&display=swap");
 
-html, body {
+html,
+body {
   background-color: var(--cream);
   color: var(--espresso);
-  font-family: 'Nunito', sans-serif;
+  font-family: "Nunito", sans-serif;
   margin: 0;
 }
 
-h1, h2, h3, .brand-title {
-  font-family: 'Baloo 2', sans-serif;
+h1,
+h2,
+h3,
+.brand-title {
+  font-family: "Baloo 2", sans-serif;
   color: var(--espresso);
 }
 
@@ -95,7 +103,7 @@ h1, h2, h3, .brand-title {
 }
 
 .hero-title {
-  font-family: 'Passion One', 'Baloo 2', sans-serif;
+  font-family: "Passion One", "Baloo 2", sans-serif;
   font-weight: 900;
   font-size: 52px;
   line-height: 1.1;
@@ -141,7 +149,7 @@ h1, h2, h3, .brand-title {
 
 .mood-link {
   display: block;
-  font-family: 'Nunito', sans-serif;
+  font-family: "Nunito", sans-serif;
   font-size: 26px;
   font-weight: 700;
   color: var(--espresso);
@@ -155,16 +163,32 @@ h1, h2, h3, .brand-title {
 }
 
 @media (max-width: 640px) {
-  .hero-card { padding: 60px 20px 30px 20px; min-height: 380px; }
+  .hero-card {
+    padding: 60px 20px 30px 20px;
+    min-height: 380px;
+  }
   .hero-title {
     font-size: 32px;
     -webkit-text-stroke: 1px var(--espresso);
   }
-  .hero-image-donut { width: 90px; top: -40px; }
-  .hero-image-drink { width: 130px; top: -40px; }
-  .hero-blob { width: 220px; height: 200px; }
-  .hero-blob-2 { display: none; }
-  .mood-link { font-size: 20px; }
+  .hero-image-donut {
+    width: 90px;
+    top: -40px;
+  }
+  .hero-image-drink {
+    width: 130px;
+    top: -40px;
+  }
+  .hero-blob {
+    width: 220px;
+    height: 200px;
+  }
+  .hero-blob-2 {
+    display: none;
+  }
+  .mood-link {
+    font-size: 20px;
+  }
 }
 
 .label-pink {
@@ -248,9 +272,11 @@ h1, h2, h3, .brand-title {
   border-radius: 999px;
   padding: 10px 22px;
   font-weight: 700;
-  font-family: 'Nunito', sans-serif;
+  font-family: "Nunito", sans-serif;
   cursor: pointer;
-  transition: transform 0.1s ease, background-color 0.15s ease;
+  transition:
+    transform 0.1s ease,
+    background-color 0.15s ease;
 }
 
 .btn-boba:hover {
@@ -270,7 +296,9 @@ h1, h2, h3, .brand-title {
   display: block;
 }
 
-.Select-control, input[type="text"], input[type="number"] {
+.Select-control,
+input[type="text"],
+input[type="number"] {
   border-radius: 14px !important;
   border: 2px solid var(--pink-soft) !important;
 }
@@ -307,6 +335,12 @@ h1, h2, h3, .brand-title {
 }
 
 @media (max-width: 640px) {
-  .navbar-boba { flex-direction: column; align-items: flex-start; }
-  .nav-links a { margin-left: 0; margin-right: 14px; }
+  .navbar-boba {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .nav-links a {
+    margin-left: 0;
+    margin-right: 14px;
+  }
 }

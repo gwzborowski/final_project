@@ -1,12 +1,18 @@
+# AI Usage
+# Claude was used to help brainstorm ideas for the layout of the comparison page.
+# It was very helpful for problem solving of some layout issues with the 
+# comparison chart and table. The functions were reviewed by us to ensure 
+# they met the project requirements and were correct.
+
 """
 pages/compare.py
-=================
+======
 Page 2 -- "Compare". Answers Q2 (compare shops by price / preference) using
 whatever results the Search page put into shop-data-store.
 
 Callbacks defined here:
-  3a. populate_shop_dropdown -- shop-data-store changes -> dropdown options
-  3b. update_comparison      -- dropdown selection -> bar chart + table
+    3a. populate_shop_dropdown -- shop-data-store changes -> dropdown options
+    3b. update_comparison      -- dropdown selection -> bar chart + table
 """
 
 import dash

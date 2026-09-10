@@ -1,12 +1,19 @@
+# AI Usage
+# AI was used to develop the code in this file but the final implementation 
+# was human-reviewed and edited further. We worked with Claude to implement 
+# The surprise_me callback, and to generate the mascot lines. 
+# The final implementation was also reviewed and edited us to 
+# ensure it met our design goals.
+
 """
 pages/about.py
-==============
+======
 Page 3 -- "About / Mascot". Project blurb plus the "Surprise Me" mascot,
 which answers the "or additionally Surprise Me to generate a recommendation"
 part of Q2 from the team's proposal.
 
 Callback defined here:
-  4. surprise_me -- button click + shop-data-store -> mascot message + highlighted shop
+    4. surprise_me -- button click + shop-data-store -> mascot message + highlighted shop
 """
 
 import random

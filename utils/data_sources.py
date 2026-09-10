@@ -31,6 +31,7 @@ Every network call is wrapped in try/except with a short timeout.
 import os
 import hashlib
 import random
+import re
 
 import pandas as pd
 import requests
@@ -190,13 +191,79 @@ def _derive_category(name, cuisine="", shop_type="", yelp_categories=None):
     return "Cafe / Tea"
 
 
-def _derive_mood_tag(name):
-    name = (name or "").lower()
-    if any(k in name for k in ("fruit", "iced", "slush", "fresh", "smoothie")):
+# Keyword lists used by _derive_mood_tag(). Deliberately broad -- the old
+# version only had 4-5 words per bucket, so almost nothing matched and
+# nearly every shop fell through to a hardcoded "Cozy" default.
+_REFRESHING_KEYWORDS = (
+    "fruit", "iced", "ice", "slush", "fresh", "smoothie", "lemonade", "mango",
+    "strawberry", "peach", "lychee", "passion", "yakult", "snow", "shave",
+    "shaved", "citrus", "cool", "chill", "breeze", "splash", "burst", "pop",
+    "soda", "cloud", "frost", "mint",
+)
+_SWEET_KEYWORDS = (
+    "mochi", "dessert", "cake", "sweet", "sugar", "candy", "bakery", "pastry",
+    "pudding", "cream", "waffle", "cookie", "donut", "bake", "bun", "custard",
+    "honey", "caramel", "choco", "vanilla", "macaron", "tart", "ube",
+)
+_COZY_KEYWORDS = (
+    "milk", "classic", "original", "roast", "brew", "warm", "cozy", "comfort",
+    "house", "traditional", "chai", "oolong", "matcha", "taro", "black tea",
+    "wintermelon", "brown sugar", "grandma", "auntie", "uncle", "kung fu",
+)
+
+
+def _matches_any_keyword(name_lower, keywords):
+    """
+    Word-boundary keyword match -- a plain substring check (e.g. "ice" in
+    name_lower) false-positives on words like "rice", "price", "spice",
+    "nice". \\b...\\b requires whole-word (or whole-phrase, for multi-word
+    entries like "brown sugar") matches instead.
+    """
+    return any(re.search(rf"\b{re.escape(k)}\b", name_lower) for k in keywords)
+
+
+def _deterministic_mood_pick(seed_text, options):
+    """
+    Deterministically choose among `options` based on a hash of seed_text,
+    so the same shop always lands on the same mood across searches (rather
+    than true random.choice(), which would flip on every reload), while
+    still spreading shops across all three moods instead of clustering on
+    one default.
+    """
+    seed = int(hashlib.md5(seed_text.encode()).hexdigest(), 16) % (2**32)
+    return random.Random(seed).choice(options)
+
+
+def _derive_mood_tag(name, category=None):
+    """
+    Infer a mood tag ('Refreshing', 'Cozy', 'Sweet') from a shop's name and
+    (optionally) its category, since neither OSM nor Yelp has a native mood
+    field. Order of preference:
+      1. Keyword match in the name -- most specific signal.
+      2. Category-based lean (Dessert -> Sweet, etc.) with a deterministic
+         pick between two plausible moods for variety.
+      3. Deterministic pick across all three moods as a last resort, so
+         shops with generic names don't all collapse onto a single default.
+    """
+    name_lower = (name or "").lower()
+
+    if _matches_any_keyword(name_lower, _REFRESHING_KEYWORDS):
         return "Refreshing"
-    if any(k in name for k in ("mochi", "dessert", "cake", "sweet")):
+    if _matches_any_keyword(name_lower, _SWEET_KEYWORDS):
         return "Sweet"
-    return "Cozy"
+    if _matches_any_keyword(name_lower, _COZY_KEYWORDS):
+        return "Cozy"
+
+    if category == "Dessert":
+        return _deterministic_mood_pick(name_lower, ["Sweet", "Sweet", "Cozy"])
+    if category == "Boba / Milk Tea":
+        return _deterministic_mood_pick(name_lower, ["Refreshing", "Cozy"])
+    if category == "Coffee":
+        return _deterministic_mood_pick(name_lower, ["Cozy", "Cozy", "Refreshing"])
+    if category == "Cafe / Tea":
+        return _deterministic_mood_pick(name_lower, ["Cozy", "Sweet"])
+
+    return _deterministic_mood_pick(name_lower, ["Refreshing", "Cozy", "Sweet"])
 
 
 _PRICE_TO_AVG = {"$": 5, "$$": 7.5, "$$$": 11, "$$$$": 15}
@@ -251,6 +318,7 @@ def _search_yelp_shops(lat, lon, radius_miles):
         price_str = biz.get("price", "$$")
         coords = biz.get("coordinates", {})
         loc = biz.get("location", {})
+        category = _derive_category(name, yelp_categories=yelp_cats)
         rows.append(
             {
                 "shop_id": f"yelp_{biz.get('id')}",
@@ -258,8 +326,8 @@ def _search_yelp_shops(lat, lon, radius_miles):
                 "lat": coords.get("latitude"),
                 "lon": coords.get("longitude"),
                 "address": ", ".join(filter(None, loc.get("display_address", []))),
-                "category": _derive_category(name, yelp_categories=yelp_cats),
-                "mood_tag": _derive_mood_tag(name),
+                "category": category,
+                "mood_tag": _derive_mood_tag(name, category),
                 "phone": biz.get("display_phone", ""),
                 "website": biz.get("url", ""),
                 "price_level": price_str,
@@ -309,6 +377,7 @@ def _search_overpass_shops(lat, lon, radius_miles):
         name = tags.get("name")
         if not name:
             continue
+        category = _derive_category(name, cuisine=tags.get("cuisine", ""), shop_type=tags.get("shop", ""))
         rows.append(
             {
                 "shop_id": f"osm_{el.get('id')}",
@@ -321,8 +390,8 @@ def _search_overpass_shops(lat, lon, radius_miles):
                         [tags.get("addr:housenumber", "") + " " + tags.get("addr:street", ""), tags.get("addr:city", "")],
                     )
                 ).strip(", ").strip(),
-                "category": _derive_category(name, cuisine=tags.get("cuisine", ""), shop_type=tags.get("shop", "")),
-                "mood_tag": _derive_mood_tag(name),
+                "category": category,
+                "mood_tag": _derive_mood_tag(name, category),
                 "phone": tags.get("phone", tags.get("contact:phone", "")),
                 "website": tags.get("website", tags.get("contact:website", "")),
             }
