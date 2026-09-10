@@ -38,11 +38,11 @@ layout = html.Div(
                     "can't decide."
                 ),
                 html.P(
-                    "Built for Competing in the Age of AI " 
+                    "Built for Competing in the Age of AI -- " 
                     "Team 3: Alex Bailey, Evie Trinh, Chase LaRose, & "
                     "Gavin Zborowski.",
                     style={"fontSize": "13px", "color": "#6b5245"},
-                ),
+            ),
             ],
         ),
         html.Div(
