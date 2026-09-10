@@ -21,7 +21,7 @@ layout = html.Div(
         html.Div(
             className="card-boba",
             children=[
-                html.H2("Compare shops"),
+                html.H2("Compare Shops!"),
                 html.P("Pick two or more spots from your last search to compare price and rating."),
                 dcc.Dropdown(id="compare-shop-dropdown", multi=True, placeholder="Search results will appear here..."),
             ],
@@ -29,7 +29,7 @@ layout = html.Div(
         html.Div(
             className="card-boba",
             children=[
-                html.H3("Average Item Price"),
+                html.H3("Average Price Per Item Comparison"),
                 dcc.Graph(id="compare-bar-chart"),
             ],
         ),

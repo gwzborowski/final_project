@@ -33,12 +33,13 @@ layout = html.Div(
                 html.H2("About Mochi x Boba"),
                 html.P(
                     "Mochi x Boba helps you find Asian dessert and drink spots that match your "
-                    "mood and today's weather, across the DMV and Hampton Roads areas. Search a "
-                    "location on the Search page, then come back here and hit Surprise Me if you "
+                    "mood and today's weather, across the globe! Search a location on the Search " 
+                    "page, then come back here and hit Surprise Me if you "
                     "can't decide."
                 ),
                 html.P(
-                    "Built for CS Dashboard Lab -- Team 3: Alex Bailey, Evie Trinh, Chase LaRose, "
+                    "Built for Competing in the Age of AI " 
+                    "Team 3: Alex Bailey, Evie Trinh, Chase LaRose, & "
                     "Gavin Zborowski.",
                     style={"fontSize": "13px", "color": "#6b5245"},
                 ),

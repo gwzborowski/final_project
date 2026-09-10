@@ -198,7 +198,7 @@ def _search_yelp_shops(lat, lon, radius_miles):
                 "latitude": lat,
                 "longitude": lon,
                 "radius": radius_m,
-                "limit": 30,
+                "limit": 50,
                 "sort_by": "distance",
             },
             timeout=REQUEST_TIMEOUT,

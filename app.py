@@ -39,7 +39,7 @@ server = app.server  # exposed for gunicorn / wsgi deployment
 NAVBAR = html.Div(
     className="navbar-boba",
     children=[
-        html.H1("🧋 Boba x Mochi", className="brand-title"),
+        html.H1("🧋 Mochi x Boba", className="brand-title"),
         html.Div(
             className="nav-links",
             children=[dcc.Link(page["name"], href=page["relative_path"]) for page in dash.page_registry.values()],

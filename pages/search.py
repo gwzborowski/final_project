@@ -30,7 +30,7 @@ layout = html.Div(
         html.Div(
             className="card-boba",
             children=[
-                html.H2("Find a boba or mochi spot"),
+                html.H2("Find Boba or Dessert Spots Near You!"),
                 html.P("Type a city or address, set a radius, and optionally filter by mood."),
                 html.Label("Location", className="control-label"),
                 dcc.Input(
@@ -69,7 +69,7 @@ layout = html.Div(
         html.Div(
             id="weather-nudge-card",
             className="card-boba",
-            children=[html.H3("Weather mood check"), html.P("Search a location to see today's mood nudge.", id="weather-nudge-text")],
+            children=[html.H3("Weather Mood Check"), html.P("Search a location to judge today's mood!", id="weather-nudge-text")],
         ),
         html.Div(
             className="card-boba",
@@ -226,7 +226,7 @@ def _shops_to_cards(df):
 def update_search_results(n_clicks, location_text, radius_miles, mood):
     if not n_clicks:
         # Initial page load, before the user has searched anything.
-        return None, None, _empty_map(), html.P("Enter a location above and click Search to get started."), ""
+        return None, None, _empty_map(), html.P("Enter a location above and click Search to get started!"), ""
 
     if not location_text or not location_text.strip():
         return dash.no_update, dash.no_update, dash.no_update, dash.no_update, "Please enter a location first."
