@@ -78,6 +78,36 @@ def geocode_location(place_text):
         return None, None, None
 
 
+def search_locations(query, count=6):
+    """
+    Return up to `count` matching city suggestions for a partial name the
+    user is typing, e.g. 'rich' -> ['Richmond, Virginia', 'Richmond, California'].
+    Powers the Search page's live location dropdown. Returns [] on any
+    failure, or if the query is too short to bother calling the API yet.
+    """
+    if not query or len(query.strip()) < 2:
+        return []
+    try:
+        resp = requests.get(
+            GEOCODE_URL,
+            params={"name": query.strip(), "count": count, "language": "en", "format": "json"},
+            timeout=REQUEST_TIMEOUT,
+        )
+        resp.raise_for_status()
+        results = resp.json().get("results") or []
+    except (requests.RequestException, ValueError):
+        return []
+
+    suggestions = []
+    for r in results:
+        label = f"{r.get('name')}, {r.get('admin1', '')}".strip(", ")
+        if r.get("country_code") and r.get("country_code") != "US":
+            label += f", {r.get('country')}"
+        if label not in suggestions:
+            suggestions.append(label)
+    return suggestions
+
+
 # ---------------------------------------------------------------------------
 # Weather + mood nudge
 # ---------------------------------------------------------------------------
@@ -119,22 +149,25 @@ def get_weather(lat, lon):
         return None
 
 
-def mood_nudge_from_weather(weather):
+def mood_nudge_from_weather(weather, location_name=None):
+    """
+    Turn a weather dict into a one-line human suggestion plus a mood tag
+    that matches the tags used on the shop data ('Refreshing', 'Cozy', 'Sweet').
+    """
     if not weather or weather.get("temperature_f") is None:
         return "Weather unavailable right now -- pick any mood below.", None
 
     temp = weather["temperature_f"]
     condition = weather["condition_label"]
+    place = f" in {location_name}" if location_name else ""
 
     if condition in ("Rainy", "Snowy"):
-        return f"It's {condition.lower()} and {temp:.0f}°F -- a hot tea or warm mochi sounds right.", "Cozy"
+        return f"It's {condition.lower()} and {temp:.0f}°F{place} -- a hot tea or warm mochi is perfect for this weather. ☕", "Cozy"
     if temp >= 80:
-        return f"It's {temp:.0f}°F and {condition.lower()} -- fruit tea or shaved ice weather.", "Refreshing"
+        return f"It's {temp:.0f}°F and {condition.lower()}{place} -- fruit tea or shaved ice is perfect for this weather. 🍧", "Refreshing"
     if temp <= 45:
-        return f"It's a brisk {temp:.0f}°F -- something warm and cozy fits best.", "Cozy"
-    return f"It's a mild {temp:.0f}°F and {condition.lower()} -- great day for any mood.", "Sweet"
-
-
+        return f"It's a brisk {temp:.0f}°F{place} -- something warm and cozy is perfect for this weather. ☕", "Cozy"
+    return f"It's a mild {temp:.0f}°F and {condition.lower()}{place} -- any sweet treat is perfect for this weather. 🍡", "Sweet"
 # ---------------------------------------------------------------------------
 # Category / mood heuristics (shared by both Overpass and Yelp rows)
 # ---------------------------------------------------------------------------
@@ -383,32 +416,26 @@ def load_fallback_shops():
         return pd.DataFrame(
             columns=["shop_id", "name", "lat", "lon", "address", "category", "mood_tag", "phone", "website"]
         ), f"Could not load fallback data: {exc}"
-
-
 # ---------------------------------------------------------------------------
-# Public entry point -- Yelp first, then Overpass, then sample data
+# Unified shop search -- Yelp first, then Overpass, then the fallback CSV
 # ---------------------------------------------------------------------------
 def find_shops(lat, lon, radius_miles=5):
     """
-    Returns (dataframe, source, error_message) where source is one of
-    "yelp", "overpass", or "fallback" -- matching what pages/search.py expects.
+    Try Yelp first (if a real API key is configured), then Overpass, then
+    fall back to the bundled sample CSV so the dashboard always has
+    something to show. Returns (dataframe, used_fallback: bool, error_message: str|None).
     """
     if lat is None or lon is None:
         df, _ = load_fallback_shops()
-        return df, "fallback", "No location provided -- showing sample shops."
+        return df, True, "No location provided -- showing sample shops."
 
     df = _search_yelp_shops(lat, lon, radius_miles)
     if not df.empty:
-        return df, "yelp", None
+        return df, False, None
 
     df = _search_overpass_shops(lat, lon, radius_miles)
     if not df.empty:
-        return df, "overpass", None
+        return df, False, None
 
-    df, _ = load_fallback_shops()
-    return df, "fallback", "No live results from Yelp or OpenStreetMap -- showing sample shops instead."
-
-
-# Backward-compatible alias -- older code may still import this name.
-query_overpass_shops = find_shops
-enrich_price_and_rating = _enrich_price_and_rating
+    df, err = load_fallback_shops()
+    return df, True, err or "No shops found nearby -- showing sample shops instead."

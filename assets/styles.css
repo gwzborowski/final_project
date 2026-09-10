@@ -17,7 +17,8 @@
   --white: #ffffff;
 }
 
-@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Nunito:wght@400;600;700&display=swap');
+/* ---- Fonts ---- */
+@import url('https://fonts.googleapis.com/css2?family=Passion+One:wght@400;700;900&family=Baloo+2:wght@500;700;800&family=Nunito:wght@400;600;700&display=swap');
 
 html, body {
   background-color: var(--cream);
@@ -29,6 +30,159 @@ html, body {
 h1, h2, h3, .brand-title {
   font-family: 'Baloo 2', sans-serif;
   color: var(--espresso);
+}
+
+/* ---- Home page hero ---- */
+.hero-boba {
+  position: relative;
+  background-color: var(--pink);
+  border-radius: 28px;
+  padding: 24px;
+  margin-bottom: 28px;
+}
+
+.hero-card {
+  position: relative;
+  background-color: var(--cream);
+  border-radius: 20px;
+  min-height: 460px;
+  padding: 70px 40px 40px 40px;
+  overflow: visible;
+}
+
+.hero-image {
+  position: absolute;
+  z-index: 2;
+}
+
+.hero-image-donut {
+  left: 2%;
+  top: -50px;
+  width: 150px;
+  transform: rotate(-6deg);
+}
+
+.hero-image-donut-2 {
+  left: -6%;
+  top: 25px;
+  width: 160px;
+  transform: rotate(8deg);
+  z-index: 1;
+}
+
+.hero-image-drink {
+  right: -9%;
+  top: -70px;
+  width: 230px;
+}
+
+.hero-dash-line {
+  border: none;
+  border-top: 5px dashed var(--espresso);
+}
+
+.hero-dash-top {
+  position: absolute;
+  top: 40px;
+  left: 24px;
+  right: 24px;
+  z-index: 1;
+}
+
+.hero-dash-bottom {
+  width: 260px;
+  margin: 14px auto 0 auto;
+}
+
+.hero-title {
+  font-family: 'Passion One', 'Baloo 2', sans-serif;
+  font-weight: 900;
+  font-size: 52px;
+  line-height: 1.1;
+  margin: 20px 0 0 0;
+  text-align: center;
+  color: var(--espresso);
+  letter-spacing: 1px;
+  -webkit-text-stroke: 1.5px var(--espresso);
+  text-stroke: 1.5px var(--espresso);
+}
+
+/* Decorative blobs behind the mood prompts, recreated in pure CSS */
+.hero-blob {
+  position: absolute;
+  bottom: -90px;
+  right: -60px;
+  width: 420px;
+  height: 380px;
+  background-color: var(--pink);
+  opacity: 0.55;
+  border-radius: 55% 45% 60% 40% / 50% 55% 45% 50%;
+  z-index: 0;
+}
+
+.hero-blob-2 {
+  position: absolute;
+  bottom: -80px;
+  right: 290px;
+  width: 300px;
+  height: 280px;
+  background-color: var(--pink);
+  opacity: 0.4;
+  border-radius: 48% 52% 40% 60% / 55% 45% 55% 45%;
+  z-index: 0;
+}
+
+.hero-moods {
+  position: relative;
+  z-index: 1;
+  margin-top: 40px;
+  text-align: right;
+}
+
+.mood-link {
+  display: block;
+  font-family: 'Nunito', sans-serif;
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--espresso);
+  text-decoration: none;
+  margin-bottom: 18px;
+  transition: color 0.15s ease;
+}
+
+.mood-link:hover {
+  color: var(--caramel);
+}
+
+@media (max-width: 640px) {
+  .hero-card { padding: 60px 20px 30px 20px; min-height: 380px; }
+  .hero-title {
+    font-size: 32px;
+    -webkit-text-stroke: 1px var(--espresso);
+  }
+  .hero-image-donut { width: 90px; top: -40px; }
+  .hero-image-drink { width: 130px; top: -40px; }
+  .hero-blob { width: 220px; height: 200px; }
+  .hero-blob-2 { display: none; }
+  .mood-link { font-size: 20px; }
+}
+
+.label-pink {
+  display: inline-block;
+  width: auto;
+  background-color: var(--pink);
+  color: var(--espresso);
+  padding: 4px 12px;
+  border-radius: 999px;
+}
+
+#weather-nudge-text {
+  background-color: var(--pink);
+  color: var(--brown);
+  padding: 12px 18px;
+  border-radius: 14px;
+  display: inline-block;
+  font-weight: 600;
 }
 
 /* ---- Top navigation bar ---- */
